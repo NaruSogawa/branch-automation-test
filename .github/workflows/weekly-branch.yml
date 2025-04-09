@@ -1,0 +1,41 @@
+name: Weekly Feature Branch Automation
+
+on:
+  schedule:
+    - cron: '0 0 * * 2'  # JST火曜9:00（UTC0:00）
+  workflow_dispatch:  # 手動実行も可
+
+jobs:
+  automate-feature-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 過去のブランチ確認のため必須
+
+      - name: Set Git config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Find latest feature branch
+        id: find_branch
+        run: |
+          # 最新の feature ブランチ名を取得（featureYYYYMMDD 形式前提）
+          LATEST_FEATURE=$(git branch -r | grep 'origin/feature20' | sed 's|origin/||' | sort | tail -n 1)
+          echo "Latest feature branch: $LATEST_FEATURE"
+          echo "latest_feature=$LATEST_FEATURE" >> $GITHUB_OUTPUT
+
+      - name: Merge latest feature into 'feature' branch
+        run: |
+          git fetch origin
+          git checkout -B feature origin/feature
+          git merge --no-ff origin/${{ steps.find_branch.outputs.latest_feature }} -m "Auto-merge latest feature"
+          git push origin feature
+
+      - name: Create new weekly feature branch
+        run: |
+          NEW_BRANCH=feature$(date +'%Y%m%d')
+          git checkout -b $NEW_BRANCH
+          git push origin $NEW_BRANCH
