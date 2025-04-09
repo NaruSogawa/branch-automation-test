@@ -25,7 +25,7 @@ jobs:
           # 最新の feature ブランチ名を取得（featureYYYYMMDD 形式前提）
           LATEST_FEATURE=$(git branch -r | grep 'origin/feature20' | sed 's|origin/||' | sort | tail -n 1)
           echo "Latest feature branch: $LATEST_FEATURE"
-          echo "latest_feature=$LATEST_FEATURE" >> $GITHUB_OUTPUT
+          echo "latest_feature=${LATEST_FEATURE}" >> "$GITHUB_OUTPUT"
 
       - name: Merge latest feature into 'feature' branch
         run: |
