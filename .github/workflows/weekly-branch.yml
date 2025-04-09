@@ -1,4 +1,6 @@
 name: Weekly Feature Branch Automation
+permissions:
+  contents: write
 
 on:
   schedule:
